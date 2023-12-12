@@ -2,7 +2,7 @@ import os
 
 # Core
 TOKEN = os.getenv("TOKEN")
-COMMAND_PREFIX = '>'
+COMMAND_PREFIX = os.getenv("COMMAND_PREFIX")
 
 # Debug
 OWNER_ID = os.getenv("OWNER_ID")
