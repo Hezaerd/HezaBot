@@ -36,6 +36,8 @@ class Help(commands.Cog, name="Help"):
                 embed = discord.Embed(title="Command not found!", color=0xff0000)
                 if similar_command:
                     embed.add_field(name="Did you mean?", value=similar_command[0], inline=False)
+                else:
+                    embed.add_field(name="No similar commands found!", value="Try again with a different command.", inline=False)
                 await ctx.reply(embed=embed)
                 return
             embed = discord.Embed(title=f"Help: {command.name}", description=command.help, color=0x00ff00)
