@@ -16,10 +16,9 @@ class Memes(commands.Cog, name="Memes"):
     async def on_ready(self):
         print(f'Memes cog loaded')
         
-    @commands.hybrid_command(name="memetemplate")
+    @commands.hybrid_command(name="memetemplate", usage=">memetemplate <qty>")
     async def get_template(self, ctx, qty: int):
-        '''Get a list of meme templates'''
-        ''' Use: >memetemplate <qty>'''
+        '''Get a list of meme templates from imgflip'''
         req = request("GET", "https://api.imgflip.com/get_memes")
 
         self.data = loads(req.text)["data"]["memes"]
@@ -29,11 +28,11 @@ class Memes(commands.Cog, name="Memes"):
 
         await ctx.reply(f'**Here are {qty} random memes templates for you!**\n{msg}')
 
-    @commands.hybrid_command(name="meme")
+    @commands.hybrid_command(name="meme", usage=">meme <template_id> <text_fields>")
     async def get_memes(self, ctx, template_id: str, text_fields: str):
-        '''Get a meme'''
-        ''' Use: >meme <template_id> <text_fields>'''
-        '''e.g. >meme 181913649 "Hello;World;This is a meme"'''
+        '''Generate a meme using imgflip
+        > **Note:** Text field have to be in double quotes *(e.g. "text1")*
+        > **Note:** Text fields have to be separated by `; ` *(e.g. "text1; text2")*'''
         try:
             params = {
                 "template_id": template_id,

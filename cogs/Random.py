@@ -9,27 +9,25 @@ class Random(commands.Cog, name="Random"):
     async def on_ready(self):
         print(f'Random cog loaded')
 
-    @commands.hybrid_command(name="random", aliases=["rand"])
+    @commands.hybrid_command(name="random", aliases=["rand"], usage=">random <min> <max>")
     async def random(self, ctx, min: int, max: int):
         '''Generates a random number between min and max'''
-        '''Use: >random [min] [max]'''
         await ctx.reply(f'Result: {random.randint(min, max)}')
 
-    @commands.hybrid_command(name="choose", aliases=["choice"])
+    @commands.hybrid_command(name="choose", aliases=["choice"], usage=">choose <choice1; choice2; ...>")
     async def choose(self, ctx, choices: str):
-        '''Chooses between multiple choices'''
-        '''Use: >choose "choice1 choice2 choice3"'''
-        choices = choices.split(" ")
+        '''Chooses between multiple choices
+        > **Note:** Choices have to be separated by `; ` *(e.g. "choice1; choice2")*'''
+        choices = choices.split('; ')
         if not all(isinstance(choice, str) for choice in choices):
             await ctx.reply('**All choices have to be strings!**')
             return
         
         await ctx.reply(f'**Choice:** {random.choice(choices)}')
 
-    @commands.hybrid_command(name="coinflip", aliases=["flip"])
+    @commands.hybrid_command(name="coinflip", aliases=["flip"], usage=">coinflip [head/tail]")
     async def coinflip(self, ctx, prediction: str = None):
-        '''Flips a coin'''
-        '''Use: >coinflip [head/tail]'''
+        ''':coin: Flips a coin'''
         result = random.choice(["Head", "Tail"])
 
         if prediction is not None and prediction.lower() not in ["head", "tail"]:
@@ -44,10 +42,9 @@ class Random(commands.Cog, name="Random"):
             else:
                 await ctx.reply(f':coin: {result} !\n**You lost!**')
 
-    @commands.hybrid_command(name="roll", aliases=["dice"])
+    @commands.hybrid_command(name="roll", aliases=["dice"], usage=">roll <NdN>")
     async def roll(self, ctx, dice: str):
-        '''Rolls dice'''
-        '''Use: >roll NdN (e.g. >roll 2d6 will roll 2 6-sided dice)'''
+        ''':game_die: Rolls a dice in NdN format'''
         try:
             rolls, limit = map(int, dice.split('d'))
         except Exception:
@@ -57,10 +54,9 @@ class Random(commands.Cog, name="Random"):
         result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
         await ctx.reply(f':game_die: **{dice}**\n**Result:** {result}')
 
-    @commands.hybrid_command(name="8ball", aliases=["8b"])
+    @commands.hybrid_command(name="8ball", aliases=["8b"], usage=">8ball <question>")
     async def eightball(self, ctx, *, question: str):
-        '''Ask the magic 8ball a question'''
-        '''Use: >8ball [question]'''
+        ''':crystal_ball: Ask the magic 8ball a question'''
         responses = [
             'It is certain.',
             'It is decidedly so.',
@@ -93,10 +89,9 @@ class Random(commands.Cog, name="Random"):
         elif choice.lower() == "scissors":
             return ":v:"
 
-    @commands.hybrid_command(name="rps", aliases=["rockpaperscissors"])
+    @commands.hybrid_command(name="rps", aliases=["rockpaperscissors"], usage=">rps <rock/paper/scissors>")
     async def rps(self, ctx, choice: str):
         '''Play rock paper scissors'''
-        '''Use: >rps [rock/paper/scissors]'''
         choice = choice.lower()
 
         beats = {

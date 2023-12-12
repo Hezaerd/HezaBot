@@ -6,12 +6,15 @@ import discord
 
 intents = discord.Intents.all()
 intents.members = True
-bot = commands.Bot(command_prefix=settings.COMMAND_PREFIX, intents=intents)
+bot = commands.Bot(command_prefix=settings.COMMAND_PREFIX, intents=intents, help_command=None)
 
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}#{bot.user.discriminator} (ID: {bot.user.id})')
     print('------')
+
+    await bot.tree.sync(guild=discord.Object(id=settings.DEV_GUILD_ID))
+    print(f'Synced {len(bot.tree)} commands to {settings.DEV_GUILD_ID}')
 
 status = cycle([
     'Pythoning',
