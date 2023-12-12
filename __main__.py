@@ -1,12 +1,12 @@
-import env
-import discord
-from os import listdir
 from discord.ext import commands, tasks
 from itertools import cycle
+from os import listdir
+import settings
+import discord
 
 intents = discord.Intents.all()
 intents.members = True
-bot = commands.Bot(command_prefix=env.COMMAND_PREFIX, intents=intents)
+bot = commands.Bot(command_prefix=settings.COMMAND_PREFIX, intents=intents)
 
 @bot.event
 async def on_ready():
@@ -44,7 +44,7 @@ async def load_cogs():
 async def main():
     change_presence.start()
     await load_cogs()
-    await bot.start(env.TOKEN)
+    await bot.start(settings.TOKEN)
 
 if __name__ == '__main__':
     import asyncio

@@ -2,15 +2,15 @@ from discord.ext import commands
 from requests import request
 from json import loads
 import discord
-import env
+import settings
 import random
 
 class Memes(commands.Cog, name="Memes"):
     def __init__(self, bot):
         self.bot = bot
 
-        self.username = env.IMGFLIP_USERNAME
-        self.password = env.IMGFLIP_PASSWORD
+        self.username = settings.IMGFLIP_USERNAME
+        self.password = settings.IMGFLIP_PASSWORD
 
     @commands.Cog.listener()
     async def on_ready(self):
