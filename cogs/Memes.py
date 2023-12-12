@@ -42,7 +42,7 @@ class Memes(commands.Cog, name="Memes"):
             }
             
             # Split the text_fields string into individual text fields
-            text_fields_list = text_fields.split(";")
+            text_fields_list = text_fields.split('; ')
 
             for i, text in enumerate(text_fields_list):
                 params[f"boxes[{i}][text]"] = text
