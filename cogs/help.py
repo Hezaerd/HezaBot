@@ -1,14 +1,16 @@
 from discord.ext import commands
 import discord
 from difflib import get_close_matches
+import time
 
 class Help(commands.Cog, name="Help"):
     def __init__(self, bot):
         self.bot = bot
+        self.loading_time = time.time()
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f'Help cog loaded')
+        print(f'Help cog loaded in {round(time.time() - self.loading_time, 2)} seconds')
 
         self.all_commands = [cmd.name for cmd in self.bot.commands if not cmd.hidden and cmd.name[0].islower()]
 

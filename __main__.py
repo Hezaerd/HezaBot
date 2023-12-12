@@ -39,10 +39,15 @@ async def block_dms(ctx):
     return ctx.guild is not None
 
 async def load_cogs():
+    import time
+    start_time = time.time()
+
     for filename in listdir('./cogs'):
         if filename.endswith('.py'):
             print(f'Cog found: {filename[:-3]}')
             await bot.load_extension(f'cogs.{filename[:-3]}')
+
+    print(f'Found {len(bot.cogs)} cogs in {round(time.time() - start_time, 2)} seconds')
         
 async def main():
     change_presence.start()

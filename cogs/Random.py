@@ -1,13 +1,15 @@
 from discord.ext import commands
 import random
+import time
 
 class Random(commands.Cog, name="Random"):
     def __init__(self, bot):
         self.bot = bot
+        self.loading_time = time.time()
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f'Random cog loaded')
+        print(f'Random cog loaded in {round(time.time() - self.loading_time, 2)} seconds')
 
     @commands.hybrid_command(name="random", aliases=["rand"], usage=">random <min> <max>")
     async def random(self, ctx, min: int, max: int):

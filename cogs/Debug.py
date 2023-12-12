@@ -2,16 +2,18 @@ from discord.ext import commands
 import discord
 from sys import version_info as sysv
 import settings
+import time
 
 class Debug(commands.Cog, name="Debug"):
     def __init__(self, bot):
         self.bot = bot
+        self.loading_time = time.time()
 
     @commands.Cog.listener()
     async def on_ready(self):
         self.dev_guild = await self.bot.fetch_guild(settings.DEV_GUILD_ID)
 
-        print(f'Debug cog loaded')
+        print(f'Debug cog loaded in {round(time.time() - self.loading_time, 2)} seconds')
 
         print(f'  [Debug]: Python version: {sysv.major}.{sysv.minor}.{sysv.micro}')
         print(f'  [Debug]: Discord.py version: {discord.__version__}')

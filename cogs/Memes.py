@@ -4,17 +4,19 @@ from json import loads
 import discord
 import settings
 import random
+import time
 
 class Memes(commands.Cog, name="Memes"):
     def __init__(self, bot):
         self.bot = bot
+        self.loading_time = time.time()
 
         self.username = settings.IMGFLIP_USERNAME
         self.password = settings.IMGFLIP_PASSWORD
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f'Memes cog loaded')
+        print(f'Memes cog loaded in {round(time.time() - self.loading_time, 2)} seconds')
         
     @commands.hybrid_command(name="memetemplate", usage=">memetemplate <qty>")
     async def get_template(self, ctx, qty: int):
