@@ -1,10 +1,13 @@
-from discord.ext import commands
-from requests import request
-from json import loads
-import discord
-import settings
 import random
 import time
+from json import loads
+
+import discord
+from discord.ext import commands
+from requests import request
+
+import settings
+
 
 class Memes(commands.Cog):
     def __init__(self, bot):
@@ -14,26 +17,28 @@ class Memes(commands.Cog):
         self.username = settings.IMGFLIP_USERNAME
         self.password = settings.IMGFLIP_PASSWORD
 
+        self.data = None
+
     @commands.Cog.listener()
     async def on_ready(self):
         print(f'Memes cog loaded in {round(time.time() - self.loading_time, 2)} seconds')
 
     @commands.hybrid_group(
-            name="meme", 
-            aliases=["memes"], 
-            usage=">meme [subcommand]", 
-            invoke_without_command=True
-            )
+        name="meme",
+        aliases=["memes"],
+        usage=">meme [subcommand]",
+        invoke_without_command=True
+    )
     async def meme(self, ctx: commands.Context) -> None:
-        '''Meme commands'''
+        """Meme commands"""
         pass
-        
+
     @meme.command(
-            name="template", 
-            usage=">meme template <qty>"
-            )
+        name="template",
+        usage=">meme template <qty>"
+    )
     async def get_template(self, ctx: commands.Context, qty: int) -> None:
-        '''Get a list of meme templates from imgflip'''
+        """Get a list of meme templates from imgflip"""
         req = request("GET", "https://api.imgflip.com/get_memes")
 
         self.data = loads(req.text)["data"]["memes"]
@@ -44,20 +49,20 @@ class Memes(commands.Cog):
         await ctx.reply(f'**Here are {qty} random memes templates for you!**\n{msg}')
 
     @meme.command(
-            name="create", 
-            usage=">meme create <template_id> <text_fields>"
-            )
+        name="create",
+        usage=">meme create <template_id> <text_fields>"
+    )
     async def get_memes(self, ctx: commands.Context, template_id: str, text_fields: str) -> None:
-        '''Generate a meme using imgflip
+        """Generate a meme using imgflip
         > **Note:** Text field have to be in double quotes *(e.g. "text1")*
-        > **Note:** Text fields have to be separated by `; ` *(e.g. "text1; text2")*'''
+        > **Note:** Text fields have to be separated by `; ` *(e.g. "text1; text2")*"""
         try:
             params = {
                 "template_id": template_id,
                 "username": self.username,
                 "password": self.password
             }
-            
+
             # Split the text_fields string into individual text fields
             text_fields_list = text_fields.split('; ')
 
@@ -84,6 +89,7 @@ class Memes(commands.Cog):
 
         except Exception as e:
             await ctx.reply(f'**Error:** {e}')
+
 
 async def setup(bot):
     await bot.add_cog(Memes(bot))
