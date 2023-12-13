@@ -4,7 +4,7 @@ from sys import version_info as sysv
 import settings
 import time
 
-class Debug(commands.Cog, name="Debug"):
+class Debug(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.loading_time = time.time()
@@ -24,20 +24,30 @@ class Debug(commands.Cog, name="Debug"):
         ''':ping_pong: Send a ping request'''
         embed = discord.Embed(title=":ping_pong: Pong!", description=f'Latency: `{round(self.bot.latency * 1000)}ms`', color=0x0099ff)    
         embed.set_footer(text=f'{ctx.message.author.name}\n' + f'Today at {ctx.message.created_at.strftime("%I:%M")}', icon_url=ctx.message.author.avatar)
-        # embed.set_footer(text=f'{ctx.author}', icon_url=ctx.author.avatar_url)
         await ctx.reply(embed=embed)
 
-    @commands.command(name="sync", usage=">sync", hidden=True)
+    @commands.command(name="invite", aliases=["link"], usage=">invite")
+    async def invite(self, ctx: commands.Context) -> None:
+        '''Get the invite link for the bot'''
+        await ctx.reply(f'**Invite link:** <https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=8&scope=bot>')
+
+    @commands.group(name="sync", usage=">sync [dev/global]", hidden=True)
     @commands.is_owner()
-    async def sync(self, ctx):
+    async def sync(self, ctx: commands.Context) -> None:
+        '''Sync commands'''
+        pass
+
+    @sync.command(name="dev", usage=">sync dev", hidden=True)
+    @commands.is_owner()
+    async def sync_dev(self, ctx: commands.Context) -> None:
         '''Sync commands to dev guild'''
         synced = await self.bot.tree.sync(guild=settings.DEV_GUILD_ID)
         print(f'  [Debug]: Synced {len(synced)} commands to {settings.DEV_GUILD_ID}')
         await ctx.send(f'Synced {len(synced)} commands to {settings.DEV_GUILD_ID}')
 
-    @commands.command(name="syncglobal", usage=">syncglobal", hidden=True)
+    @sync.command(name="global", usage=">sync global", hidden=True)
     @commands.is_owner()
-    async def syncglobal(self, ctx):
+    async def syncglobal(self, ctx: commands.Context) -> None:
         '''Sync commands globally'''
         synced = await self.bot.tree.sync()
         print(f'  [Debug]: Synced {len(synced)} commands globally')

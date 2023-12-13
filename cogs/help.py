@@ -14,12 +14,16 @@ class Help(commands.Cog, name="Help"):
 
         self.all_commands = [cmd.name for cmd in self.bot.commands if not cmd.hidden and cmd.name[0].islower()]
 
-    def _similar(self, command):
+    def _similar(self, command: str) -> list:
         '''Look for a similar command'''
         return get_close_matches(command, self.all_commands, n=1, cutoff=0.5)
 
-    @commands.hybrid_command(name="help", aliases=["h"], usage=">help [command]")
-    async def help(self, ctx, command: str = None):
+    @commands.hybrid_command(
+            name="help", 
+            aliases=["h"], 
+            usage=">help [command]"
+            )
+    async def help(self, ctx: commands.Context, command: str = None) -> None:
         '''Shows help'''
         if command is None:
             embed = discord.Embed(title="Help", description=f"Use `{self.bot.command_prefix}help [command]` for more info on a command.", color=0x00ff00)

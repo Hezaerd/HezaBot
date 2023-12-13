@@ -11,17 +11,26 @@ class User(commands.Cog):
         super().__init__()
 
     @commands.Cog.listener()
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         print(f'User cog loaded in {round(time.time() - self.loading_time, 2)} seconds')
 
-    @commands.hybrid_group(name="user", aliases=["u"], usage=">user [subcommand]", invoke_without_command=True)
-    async def user(self, ctx: commands.Context):
+    @commands.hybrid_group(
+            name="user", 
+            aliases=["u"], 
+            usage=">user [subcommand]", 
+            invoke_without_command=True
+            )
+    async def user(self, ctx: commands.Context) -> None:
         '''User commands'''
         if ctx.invoked_subcommand is None:
             await ctx.reply_help(ctx.command)
 
-    @user.command(name="avatar", aliases=["pp", "image"], usage=">user avatar [user]")
-    async def avatar(self, ctx: commands.Context, user: discord.Member = None):
+    @user.command(
+            name="avatar",
+            aliases=["pp", "image"],
+            usage=">user avatar [user]"
+            )
+    async def avatar(self, ctx: commands.Context, user: discord.Member = None) -> None:
         '''Get user avatar'''
         if user is None:
             user = ctx.message.author
@@ -30,8 +39,12 @@ class User(commands.Cog):
         embed.set_image(url=user.avatar)
         await ctx.reply(embed=embed)
 
-    @user.command(name="banner", aliases=["bn"], usage=">user banner [user]")
-    async def banner(self, ctx: commands.Context, user: discord.Member = None):
+    @user.command(
+            name="banner", 
+            aliases=["bn"], 
+            usage=">user banner [user]"
+            )
+    async def banner(self, ctx: commands.Context, user: discord.Member = None) -> None:
         '''Get user banner'''
         if user is None:
             user = ctx.message.author
@@ -46,8 +59,12 @@ class User(commands.Cog):
         embed.set_image(url=user.banner)
         await ctx.reply(embed=embed)
 
-    @user.command(name="id", aliases=["uid"], usage=">user id [user]")
-    async def id(self, ctx: commands.Context, user: discord.Member = None):
+    @user.command(
+            name="id", 
+            aliases=["uid"], 
+            usage=">user id [user]"
+            )
+    async def id(self, ctx: commands.Context, user: discord.Member = None) -> None:
         '''Get user ID'''
         if user is None:
             user = ctx.message.author
@@ -55,7 +72,11 @@ class User(commands.Cog):
         embed = discord.Embed(title=f"{user}'s ID", description=user.id, color=0xdfa3ff)
         await ctx.reply(embed=embed)
 
-    @user.command(name="infos", aliases=["ui", "info"], usage=">user infos [user] [show_roles]")
+    @user.command(
+            name="infos", 
+            aliases=["ui", "info"], 
+            usage=">user infos [user] [show_roles]"
+            )
     async def infos(self, ctx: commands.Context, user: discord.Member = None, show_roles: bool = True):
         '''Get user info'''
         if user is None:
@@ -94,8 +115,12 @@ class User(commands.Cog):
         
         await ctx.reply(embed=embed)
 
-    @user.command(name="list", aliases=["ls"], usage=">user list [qty]")
-    async def list(self, ctx: commands.Context, qty: int = 5):
+    @user.command(
+            name="list", 
+            aliases=["ls"],
+            usage=">user list [qty]"
+            )
+    async def list(self, ctx: commands.Context, qty: int = 5) -> None:
         '''List users'''
         members = sorted(ctx.guild.members, key=lambda m: m.joined_at)
         members = members[:qty]

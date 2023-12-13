@@ -6,7 +6,7 @@ import settings
 import random
 import time
 
-class Memes(commands.Cog, name="Memes"):
+class Memes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.loading_time = time.time()
@@ -17,9 +17,22 @@ class Memes(commands.Cog, name="Memes"):
     @commands.Cog.listener()
     async def on_ready(self):
         print(f'Memes cog loaded in {round(time.time() - self.loading_time, 2)} seconds')
+
+    @commands.hybrid_group(
+            name="meme", 
+            aliases=["memes"], 
+            usage=">meme [subcommand]", 
+            invoke_without_command=True
+            )
+    async def meme(self, ctx: commands.Context) -> None:
+        '''Meme commands'''
+        pass
         
-    @commands.hybrid_command(name="memetemplate", usage=">memetemplate <qty>")
-    async def get_template(self, ctx, qty: int):
+    @meme.command(
+            name="template", 
+            usage=">meme template <qty>"
+            )
+    async def get_template(self, ctx: commands.Context, qty: int) -> None:
         '''Get a list of meme templates from imgflip'''
         req = request("GET", "https://api.imgflip.com/get_memes")
 
@@ -30,8 +43,11 @@ class Memes(commands.Cog, name="Memes"):
 
         await ctx.reply(f'**Here are {qty} random memes templates for you!**\n{msg}')
 
-    @commands.hybrid_command(name="meme", usage=">meme <template_id> <text_fields>")
-    async def get_memes(self, ctx, template_id: str, text_fields: str):
+    @meme.command(
+            name="create", 
+            usage=">meme create <template_id> <text_fields>"
+            )
+    async def get_memes(self, ctx: commands.Context, template_id: str, text_fields: str) -> None:
         '''Generate a meme using imgflip
         > **Note:** Text field have to be in double quotes *(e.g. "text1")*
         > **Note:** Text fields have to be separated by `; ` *(e.g. "text1; text2")*'''

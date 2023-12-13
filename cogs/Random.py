@@ -1,23 +1,40 @@
 from discord.ext import commands
+from asyncio import TimeoutError
+import discord
 import random
 import time
 
-class Random(commands.Cog, name="Random"):
+class Random(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.loading_time = time.time()
 
+        self.rps_reactions = [':rock:', ':roll_of_paper:', ':scissors:']
+
     @commands.Cog.listener()
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         print(f'Random cog loaded in {round(time.time() - self.loading_time, 2)} seconds')
 
-    @commands.hybrid_command(name="random", aliases=["rand"], usage=">random <min> <max>")
-    async def random(self, ctx, min: int, max: int):
-        '''Generates a random number between min and max'''
+    @commands.hybrid_group(
+            name="random", 
+            aliases=["rand"], 
+            usage=">random [subcommand]", 
+            invoke_without_command=True)
+    async def random(self, ctx: commands.Context) -> None:
+        '''Random commands'''
+        pass
+
+    @random.command(
+            name="int", 
+            usage=">random int <min> <max>")
+    async def randint(self, ctx: commands.Context, min: int, max: int) -> None:
+        '''Generates a random integer between min and max'''
         await ctx.reply(f'Result: {random.randint(min, max)}')
 
-    @commands.hybrid_command(name="choose", aliases=["choice"], usage=">choose <choice1; choice2; ...>")
-    async def choose(self, ctx, choices: str):
+    @random.command(name="choose", 
+                    aliases=["choice"], 
+                    usage=">random choose <choice1; choice2; ...>")
+    async def choose(self, ctx: commands.Context, choices: str) -> None:
         '''Chooses between multiple choices
         > **Note:** Choices have to be separated by `; ` *(e.g. "choice1; choice2")*'''
         choices = choices.split('; ')
@@ -27,8 +44,10 @@ class Random(commands.Cog, name="Random"):
         
         await ctx.reply(f'**Choice:** {random.choice(choices)}')
 
-    @commands.hybrid_command(name="coinflip", aliases=["flip"], usage=">coinflip [head/tail]")
-    async def coinflip(self, ctx, prediction: str = None):
+    @random.command(name="flip", 
+                    aliases=["coinflip"], 
+                    usage=">random flip [head/tail]")
+    async def coinflip(self, ctx: commands.Context, prediction: str = None) -> None:
         ''':coin: Flips a coin'''
         result = random.choice(["Head", "Tail"])
 
@@ -44,8 +63,10 @@ class Random(commands.Cog, name="Random"):
             else:
                 await ctx.reply(f':coin: {result} !\n**You lost!**')
 
-    @commands.hybrid_command(name="roll", aliases=["dice"], usage=">roll <NdN>")
-    async def roll(self, ctx, dice: str):
+    @random.command(name="roll", 
+                    aliases=["dice"], 
+                    usage=">roll <NdN>")
+    async def roll(self, ctx: commands.Context, dice: str) -> None:
         ''':game_die: Rolls a dice in NdN format'''
         try:
             rolls, limit = map(int, dice.split('d'))
@@ -56,8 +77,10 @@ class Random(commands.Cog, name="Random"):
         result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
         await ctx.reply(f':game_die: **{dice}**\n**Result:** {result}')
 
-    @commands.hybrid_command(name="8ball", aliases=["8b"], usage=">8ball <question>")
-    async def eightball(self, ctx, *, question: str):
+    @random.command(name="8ball", 
+                    aliases=["8b"], 
+                    usage=">random 8ball <question>")
+    async def eightball(self, ctx: commands.Context, question: str) -> None:
         ''':crystal_ball: Ask the magic 8ball a question'''
         responses = [
             'It is certain.',
@@ -82,41 +105,6 @@ class Random(commands.Cog, name="Random"):
             'Very doubtful.'
         ]
         await ctx.reply(f'**Question:** {question}\n:crystal_ball: **Answer:** {random.choice(responses)}')
-
-    def _rps_to_emoji(self, choice: str):
-        if choice.lower() == "rock":
-            return ":right_facing_fist:"
-        elif choice.lower() == "paper":
-            return ":rightwards_hand:"
-        elif choice.lower() == "scissors":
-            return ":v:"
-
-    @commands.hybrid_command(name="rps", aliases=["rockpaperscissors"], usage=">rps <rock/paper/scissors>")
-    async def rps(self, ctx, choice: str):
-        '''Play rock paper scissors'''
-        choice = choice.lower()
-
-        beats = {
-            'rock': 'scissors',
-            'paper': 'rock',
-            'scissors': 'paper'
-        }
-
-        if choice not in beats.keys():
-            await ctx.reply('**Invalid choice!**')
-            return
-        
-        bot_choice = random.choice(list(beats.keys()))
-
-        you_msg = f'**You:** {self._rps_to_emoji(choice)}'
-        bot_msg = f'**Bot:** {self._rps_to_emoji(bot_choice)}'
-
-        if choice == bot_choice:
-            await ctx.reply(f'{you_msg}\n{bot_msg}\n**Draw!**')
-        elif beats[choice] == bot_choice:
-            await ctx.reply(f'{you_msg}\n{bot_msg}\n**You won!**')
-        else:
-            await ctx.reply(f'{you_msg}\n{bot_msg}\n**You lost!**')
 
 async def setup(bot):
     await bot.add_cog(Random(bot))
