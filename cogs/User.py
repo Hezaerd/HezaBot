@@ -3,7 +3,7 @@ from discord import app_commands
 import discord
 import time
 
-class User(commands.GroupCog, group_name="user"):
+class User(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.loading_time = time.time()
