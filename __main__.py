@@ -85,10 +85,7 @@ async def main():
     change_presence.start()
     await load_cogs()
     await bot.start(settings.TOKEN)
-
-    settings.DEV_GUILD = await bot.fetch_guild(settings.DEV_GUILD_ID)
-    settings.OWNER = await bot.fetch_user(settings.OWNER_ID)
-
+    
 
 if __name__ == '__main__':
     import asyncio
