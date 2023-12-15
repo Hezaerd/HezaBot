@@ -15,6 +15,7 @@ cogs_cache = []
 
 @bot.event
 async def on_ready():
+    print('------')
     print(f'Logged in as {bot.user.name}#{bot.user.discriminator} (ID: {bot.user.id})')
     print(f'Serving {len(bot.guilds)} guilds & {len(bot.users)} users')
     print('------')
@@ -81,6 +82,9 @@ async def main():
     change_presence.start()
     await load_cogs()
     await bot.start(settings.TOKEN)
+
+    settings.DEV_GUILD = await bot.fetch_guild(settings.DEV_GUILD_ID)
+    settings.OWNER = await bot.fetch_user(settings.OWNER_ID)
 
 
 if __name__ == '__main__':
