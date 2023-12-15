@@ -10,10 +10,13 @@ intents = discord.Intents.all()
 intents.members = True
 bot = commands.Bot(command_prefix=settings.COMMAND_PREFIX, intents=intents, help_command=None)
 
+cogs_cache = []
+
 
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}#{bot.user.discriminator} (ID: {bot.user.id})')
+    print(f'Serving {len(bot.guilds)} guilds & {len(bot.users)} users')
     print('------')
 
     await bot.tree.sync(guild=discord.Object(id=settings.DEV_GUILD_ID))
@@ -50,12 +53,28 @@ async def load_cogs():
     import time
     start_time = time.time()
 
+    print('------')
+    print('Loading cogs... (multi-threaded)')
+
     for filename in listdir('./cogs'):
         if filename.endswith('.py'):
-            print(f'Cog found: {filename[:-3]}')
+            print(f'Cog found: {filename[:-3]} ({round(time.time() - start_time, 2)} seconds)')
             await bot.load_extension(f'cogs.{filename[:-3]}')
+            cogs_cache.append(filename[:-3])
 
     print(f'Found {len(bot.cogs)} cogs in {round(time.time() - start_time, 2)} seconds')
+    print('------')
+
+
+async def unload_cogs():
+    import time
+    start_time = time.time()
+
+    for cog in cogs_cache:
+        print(f'Cog unloaded: {cog}')
+        await bot.unload_extension(f'cogs.{cog}')
+
+    print(f'Unloaded {len(bot.cogs)} cogs in {round(time.time() - start_time, 2)} seconds (cached)')
 
 
 async def main():
@@ -66,4 +85,14 @@ async def main():
 
 if __name__ == '__main__':
     import asyncio
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print('------')
+        print('KeyboardInterrupt')
+        print('------')
+        print('Unloading cogs...')
+        asyncio.run(unload_cogs())
+        print('------')
+        print('Closing bot...')
+        asyncio.run(bot.close())
