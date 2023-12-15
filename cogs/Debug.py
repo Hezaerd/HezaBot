@@ -6,6 +6,7 @@ import discord
 from discord.ext import commands
 
 import settings
+from Embeds import HezaBot
 
 
 class Debug(commands.Cog):
@@ -47,39 +48,12 @@ class Debug(commands.Cog):
         await ctx.reply(embed=embed)
 
     @debug.command(
-        name="info",
+        name="infos",
         usage=">debug info"
     )
-    async def info(self, ctx: commands.Context) -> None:
-        embed = discord.Embed(title="HezaBot",
-                              description="A multi function bot!",
-                              colour=0x00b0f4,
-                              timestamp=datetime.now())
-
-        embed.add_field(name="Owner :crown:",
-                        value=f'[{settings.OWNER}](https://github.com/Hezaerd)',
-                        inline=False)
-        embed.add_field(name="Discord.py :",
-                        value=f'{discord.__version__}',
-                        inline=True)
-        embed.add_field(name="Python :",
-                        value=f'{sysv.major}.{sysv.minor}.{sysv.micro}',
-                        inline=True)
-        embed.add_field(name="Source code :",
-                        value="[Github](https://github.com/Hezaerd/HezaBot)",
-                        inline=True)
-        embed.add_field(name="Tips:",
-                        value="Use `>help` to know where to start!",
-                        inline=True)
-
-        embed.set_thumbnail(
-            url="https://cdn.discordapp.com/avatars/1181640113239900303/b71bc57ef9b51c2ab9e060d8a39eecff.png?size=1024")
-
-        embed.set_footer(text="Made with ❤️ by Hezaerd",
-                         icon_url="https://cdn.discordapp.com/avatars/225942632050720768"
-                                  "/a_360dbeff591c32cb664950aab0a5a6c8.gif?size=1024")
-
-        await ctx.reply(embed=embed)
+    async def infos(self, ctx: commands.Context) -> None:
+        """Get info about the bot"""
+        await ctx.reply(embed=HezaBot.embed())
 
     @commands.command(name="invite", aliases=["link"], usage=">invite")
     async def invite(self, ctx: commands.Context) -> None:

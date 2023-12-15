@@ -1,7 +1,10 @@
-from discord.ext import commands
-from discord import app_commands
-import discord
 import time
+
+import discord
+from discord.ext import commands
+
+from Embeds import HezaBot
+
 
 class User(commands.Cog):
     def __init__(self, bot):
@@ -15,23 +18,23 @@ class User(commands.Cog):
         print(f'User cog loaded in {round(time.time() - self.loading_time, 2)} seconds')
 
     @commands.hybrid_group(
-            name="user", 
-            aliases=["u"], 
-            usage=">user [subcommand]", 
-            invoke_without_command=True
-            )
+        name="user",
+        aliases=["u"],
+        usage=">user [subcommand]",
+        invoke_without_command=True
+    )
     async def user(self, ctx: commands.Context) -> None:
-        '''User commands'''
+        """User commands"""
         if ctx.invoked_subcommand is None:
-            await ctx.reply_help(ctx.command)
+            await ctx.send_help(ctx.command)
 
     @user.command(
-            name="avatar",
-            aliases=["pp", "image"],
-            usage=">user avatar [user]"
-            )
+        name="avatar",
+        aliases=["pp", "image"],
+        usage=">user avatar [user]"
+    )
     async def avatar(self, ctx: commands.Context, user: discord.Member = None) -> None:
-        '''Get user avatar'''
+        """Get user avatar"""
         if user is None:
             user = ctx.message.author
 
@@ -40,12 +43,12 @@ class User(commands.Cog):
         await ctx.reply(embed=embed)
 
     @user.command(
-            name="banner", 
-            aliases=["bn"], 
-            usage=">user banner [user]"
-            )
+        name="banner",
+        aliases=["bn"],
+        usage=">user banner [user]"
+    )
     async def banner(self, ctx: commands.Context, user: discord.Member = None) -> None:
-        '''Get user banner'''
+        """Get user banner"""
         if user is None:
             user = ctx.message.author
 
@@ -60,12 +63,12 @@ class User(commands.Cog):
         await ctx.reply(embed=embed)
 
     @user.command(
-            name="id", 
-            aliases=["uid"], 
-            usage=">user id [user]"
-            )
+        name="id",
+        aliases=["uid"],
+        usage=">user id [user]"
+    )
     async def id(self, ctx: commands.Context, user: discord.Member = None) -> None:
-        '''Get user ID'''
+        """Get user ID"""
         if user is None:
             user = ctx.message.author
 
@@ -73,14 +76,18 @@ class User(commands.Cog):
         await ctx.reply(embed=embed)
 
     @user.command(
-            name="infos", 
-            aliases=["ui", "info"], 
-            usage=">user infos [user] [show_roles]"
-            )
+        name="infos",
+        aliases=["ui", "info"],
+        usage=">user infos [user] [show_roles]"
+    )
     async def infos(self, ctx: commands.Context, user: discord.Member = None, show_roles: bool = True):
-        '''Get user info'''
+        """Get user info"""
         if user is None:
             user = ctx.message.author
+
+        if user == self.bot.user:
+            await ctx.reply(content="**Hey that's me!**", embed=HezaBot.embed())
+            return
 
         date_format = '%d/%m/%Y %H:%M:%S'
         members = sorted(ctx.guild.members, key=lambda m: m.joined_at)
@@ -99,7 +106,7 @@ class User(commands.Cog):
         embed.set_author(name=str(user), icon_url=user.avatar)
         embed.set_thumbnail(url=user.avatar)
         embed.add_field(name="Joined", value=user.joined_at.strftime(date_format))
-        embed.add_field(name=f'Join position', value=f'{join_pos_emoji} {str(members.index(user)+1)}', inline=True)
+        embed.add_field(name=f'Join position', value=f'{join_pos_emoji} {str(members.index(user) + 1)}', inline=True)
         embed.add_field(name="Created", value=user.created_at.strftime(date_format))
 
         if user.bot:
@@ -107,31 +114,30 @@ class User(commands.Cog):
         elif show_roles:
             if len(user.roles) > 1:
                 role_string = ' '.join([r.mention for r in user.roles][1:])
-                embed.add_field(name="Roles [{}]".format(len(user.roles)-1), value=role_string, inline=False)
+                embed.add_field(name="Roles [{}]".format(len(user.roles) - 1), value=role_string, inline=False)
             else:
                 embed.add_field(name="Roles", value="None", inline=False)
 
         embed.set_footer(text='ID: ' + str(user.id))
-        
+
         await ctx.reply(embed=embed)
 
     @user.command(
-            name="list", 
-            aliases=["ls"],
-            usage=">user list [qty]"
-            )
+        name="list",
+        aliases=["ls"],
+        usage=">user list [qty]"
+    )
     async def list(self, ctx: commands.Context, qty: int = 5) -> None:
-        '''List users'''
+        """List users"""
         members = sorted(ctx.guild.members, key=lambda m: m.joined_at)
         members = members[:qty]
 
         msg = ""
 
-        for i, m in enumerate(members):
-            join_pos_emoji = ""
-            if m == ctx.guild.owner:
+        for i, member in enumerate(members):
+            if member == ctx.guild.owner:
                 join_pos_emoji = ":crown:"
-            elif m.bot:
+            elif member.bot:
                 join_pos_emoji = ":robot:"
             elif i == 0:
                 join_pos_emoji = ":first_place:"
@@ -140,12 +146,13 @@ class User(commands.Cog):
             elif i == 2:
                 join_pos_emoji = ":third_place:"
             else:
-                join_pos_emoji = ":white_small_square:" #FIXME: found a way to just use a space (' ' & " " don't work)
-            
-            msg += f'{join_pos_emoji} {i+1}. {m.mention}\n'
+                join_pos_emoji = ":white_small_square:"  # FIXME: found a way to just use a space (' ' & " " don't work)
+
+            msg += f'{join_pos_emoji} {i + 1}. {member.mention}\n'
 
         embed = discord.Embed(title=f"Top {qty} members", description=msg, color=0xdfa3ff)
         await ctx.reply(embed=embed)
+
 
 async def setup(bot):
     await bot.add_cog(User(bot))
