@@ -71,11 +71,14 @@ async def unload_cogs():
     import time
     start_time = time.time()
 
-    for cog in cogs_cache:
-        print(f'Cog unloaded: {cog}')
-        await bot.unload_extension(f'cogs.{cog}')
+    cogs = 0
 
-    print(f'Unloaded {len(bot.cogs)} cogs in {round(time.time() - start_time, 2)} seconds (cached)')
+    for cog in cogs_cache:
+        print(f'Cog unloaded: {cog} in {round(time.time() - start_time, 2)} seconds (cached)')
+        await bot.unload_extension(f'cogs.{cog}')
+        cogs += 1
+
+    print(f'Unloaded {cogs} cogs in {round(time.time() - start_time, 2)} seconds (cached)')
 
 
 async def main():
