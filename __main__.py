@@ -5,10 +5,13 @@ import discord
 from discord.ext import commands, tasks
 
 import settings
+from Modules.DB import DB
+
 
 intents = discord.Intents.all()
 intents.members = True
 bot = commands.Bot(command_prefix=settings.COMMAND_PREFIX, intents=intents, help_command=None)
+
 
 cogs_cache = []
 
@@ -20,8 +23,9 @@ async def on_ready():
     print(f'Serving {len(bot.guilds)} guilds & {len(bot.users)} users')
     print('------')
 
-    await bot.tree.sync(guild=discord.Object(id=settings.DEV_GUILD_ID))
-    print(f'Synced {len(bot.tree)} commands to {settings.DEV_GUILD_ID}')
+    # MongoDB
+    DB().client  # Connect to MongoDB
+    print('------')
 
 
 status = cycle([
@@ -31,7 +35,7 @@ status = cycle([
 ])
 
 
-@tasks.loop(minutes=1)
+@tasks.loop(minutes=5)
 async def change_presence():
     new_status = next(status)
     await bot.change_presence(activity=discord.Game(new_status))
