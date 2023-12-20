@@ -219,7 +219,6 @@ class User(commands.Cog):
         if not is_registered:
             embed.add_field(name="Tips", value=f"Use `{settings.COMMAND_PREFIX}user register` to register yourself!")
 
-
         embed.set_footer(text=f'ID: {str(user.id)}')
 
         await ctx.reply(embed=embed)
