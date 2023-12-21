@@ -83,7 +83,7 @@ class Economy(commands.Cog):
             if user["last_hourly"] + 3600 <= time.time():
                 gain = randint(65, 80)
 
-                self.db.users.update_one({"_id": ctx.author.id}, {"$set": {"last_hourly": time.time()}})
+                self.db.users.update_one({"_id": ctx.author.id}, {"$set": {"last_hourly": round(time.time())}})
                 self.db.users.update_one({"_id": ctx.author.id}, {"$inc": {"balance": gain}})
                 await ctx.reply(f"You got {gain} {settings.CURRENCY}!")
             else:
@@ -110,7 +110,7 @@ class Economy(commands.Cog):
             if user["last_daily"] + 86400 <= time.time():
                 gain = randint(500, 600)
 
-                self.db.users.update_one({"_id": ctx.author.id}, {"$set": {"last_daily": time.time()}})
+                self.db.users.update_one({"_id": ctx.author.id}, {"$set": {"last_daily": round(time.time())}})
                 self.db.users.update_one({"_id": ctx.author.id}, {"$inc": {"balance": gain}})
                 await ctx.reply(f"You got {gain} {settings.CURRENCY}!")
             else:
