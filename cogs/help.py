@@ -4,6 +4,8 @@ from difflib import get_close_matches
 import discord
 from discord.ext import commands
 
+from Modules import Utils
+
 
 class Help(commands.Cog, name="Help"):
     def __init__(self, bot):
@@ -11,57 +13,138 @@ class Help(commands.Cog, name="Help"):
         self.loading_time = time.time()
 
         self.all_commands = None
+        self.all_cogs = None
 
     @commands.Cog.listener()
     async def on_ready(self):
         print(f'Help cog loaded in {round(time.time() - self.loading_time, 2)} seconds')
-
+        self._refresh_commands()
+        
+    def _refresh_commands(self) -> None:
+        """Refresh the list of all commands"""
         self.all_commands = [cmd.name for cmd in self.bot.commands if not cmd.hidden and cmd.name[0].islower()]
 
-    def _similar(self, command: str) -> list:
-        """Look for a similar command"""
-        return get_close_matches(command, self.all_commands, n=1, cutoff=0.5)
+    def _refresh_cogs(self) -> None:
+        """Refresh the list of all cogs"""
+        self.all_cogs = [cog.name for cog in self.bot.cogs.values() if not cog.hidden and cog.name[0].islower()]
+
+    def _embed_default(self) -> discord.Embed:
+        """Return an embed for the default help command"""
+        embed = discord.Embed(
+            title=">help",
+            description="Shows help for all commands",
+            color=Colors.Embed.Success)
+
+        embed.add_field(
+            name="Commands", 
+            value="\n".join(self.all_commands), 
+            inline=False
+        )
+        
+        return embed
+    
+    def _embed_cmd_not_found(self, command: str) -> discord.Embed:
+        """Return an embed for a command not found"""
+        similar_command = get_close_matches(command, self.all_commands, n=1, cutoff=0.5)
+
+        embed = discord.Embed(title="Command not found!", color=Colors.Embed.Error)
+
+        if similar_command:
+            embed.colour = Colors.Embed.Similar
+            embed.add_field(
+                name="Did you mean?", 
+                value=similar_command[0], 
+                inline=False
+            )
+        else:
+            embed.add_field(
+                name="No similar commands found!", 
+                value="Try again with a different command.",
+                inline=False
+            )
+        return embed
+
+    def _embed_subcommand_not_found(self, command: str, subcommand: str) -> discord.Embed:
+        """Return an embed for a subcommand not found"""
+        similar_subcommand = get_close_matches(subcommand, self.bot.get_command(command), n=1, cutoff=0.5)
+
+        embed = discord.Embed(title="Subcommand not found!", color=Colors.Embed.Error)
+
+        if similar_subcommand:
+            embed.colour = Colors.Embed.Similar
+            embed.add_field(
+                name="Did you mean?",
+                value=similar_subcommand[0],
+                inline=False
+            )
+        else:
+            embed.add_field(
+                name="No similar subcommands found!",
+                value="Try again with a different subcommand.",
+                inline=False
+            )
+        return embed
 
     @commands.hybrid_command(
         name="help",
-        aliases=["h"],
-        usage=">help [command]"
+        usage=">help [command/group] [subcommand]"
     )
-    async def help(self, ctx: commands.Context, command: str = None) -> None:
-        """Shows help"""
-        if command is None:
-            embed = discord.Embed(title="Help",
-                                  description=f"Use `{self.bot.command_prefix}help [command]` for more info on a "
-                                              f"command.",
-                                  color=0x00ff00)
-            for cog in self.bot.cogs:
-                cog_commands = self.bot.get_cog(cog).get_commands()
-                if len(cog_commands) != 0:
-                    filtered_commands = [cmd for cmd in cog_commands if
-                                         not cmd.hidden and cmd.name[0].islower()]  # Exclude hidden commands and gears
-                    if len(filtered_commands) != 0:
-                        embed.add_field(name=cog,
-                                        value=f"`{', '.join([command.name for command in filtered_commands])}`",
-                                        inline=False)
+    async def help(self, ctx: commands.Context, command: str = None, subcommand: str = None) -> None:
+        f"""Shows help
+        > **Note:** If no command is specified, a list of all commands will be shown.
+        > **Note:** If a command is specified, a list of all subcommands will be shown.
+        > **Note:** To get help for a subcommand, specify the command and the subcommand.
+        (e.g. `>help user avatar`)"""
+        if command is None and subcommand is None:
+            embed = self._embed_default()
             await ctx.reply(embed=embed)
-        else:
-            user_command = command
-            command = self.bot.get_command(command)
-            if command is None or command.hidden or command.name[0].isupper():  # Exclude hidden commands and gears
-                similar_command = self._similar(user_command)
-                embed = discord.Embed(title="Command not found!", color=0xff0000)
-                if similar_command:
-                    embed.add_field(name="Did you mean?", value=similar_command[0], inline=False)
-                else:
-                    embed.add_field(name="No similar commands found!", value="Try again with a different command.",
-                                    inline=False)
+            return
+
+        if command is not None and subcommand is None:
+            if command in self.all_commands:
+                cmd = self.bot.get_command(command)
+                embed = discord.Embed(
+                    title=f"Help for {cmd.name}",
+                    description=cmd.help,
+                    color=Colors.Embed.Success
+                )
+                embed.add_field(
+                    name="Usage",
+                    value=cmd.usage,
+                    inline=False
+                )
                 await ctx.reply(embed=embed)
                 return
-            embed = discord.Embed(title=f"Help: {command.name}", description=command.help, color=0x00ff00)
-            if len(command.aliases) != 0:
-                embed.add_field(name="Aliases", value=", ".join(command.aliases), inline=False)
-            embed.add_field(name="Usage", value=command.usage, inline=False)  # Add the usage field
-            await ctx.reply(embed=embed)
+            else:
+                embed = self._embed_cmd_not_found(command)
+                await ctx.reply(embed=embed)
+                return
+
+        if command is not None and subcommand is not None:
+            if command in self.all_commands:
+                cmd = self.bot.get_command(command)
+                if subcommand in cmd.commands:
+                    subcmd = cmd.get_command(subcommand)
+                    embed = discord.Embed(
+                        title=f"Help for {subcmd.name}",
+                        description=subcmd.help,
+                        color=Colors.Embed.Success
+                    )
+                    embed.add_field(
+                        name="Usage",
+                        value=subcmd.usage,
+                        inline=False
+                    )
+                    await ctx.reply(embed=embed)
+                    return
+                else:
+                    embed = self._embed_subcommand_not_found(command, subcommand)
+                    await ctx.reply(embed=embed)
+                    return
+            else:
+                embed = self._embed_cmd_not_found(command)
+                await ctx.reply(embed=embed)
+                return
 
 
 async def setup(bot):
