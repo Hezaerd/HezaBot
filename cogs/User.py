@@ -2,6 +2,7 @@ import time
 
 import discord
 from discord.ext import commands
+from numerize import numerize
 
 from Modules.DB import DB
 from Embeds import HezaBot
@@ -156,12 +157,52 @@ class User(commands.Cog):
         embed = discord.Embed(title=f"{user}'s ID", description=user.id, color=0xdfa3ff)
         await ctx.reply(embed=embed)
 
+    def _get_created_at(self, user: discord.Member) -> str:
+        return f'<t:{int(user.created_at.timestamp())}:d>'
+
+    def _get_joined_at(self, user: discord.Member) -> str:
+        return f'<t:{int(user.joined_at.timestamp())}:d>'
+
+    def _get_joined_pos(self, user: discord.Member) -> str:
+        members = sorted(user.guild.members, key=lambda m: m.joined_at)
+
+        if user == user.guild.owner:
+            join_pos_emoji = ":crown:"
+        elif user == user.guild.me:
+            join_pos_emoji = ":robot:"
+        elif members.index(user) == 1:
+            join_pos_emoji = ":second_place:"
+        elif members.index(user) == 2:
+            join_pos_emoji = ":third_place:"
+        else:
+            join_pos_emoji = ":white_small_square:"
+
+        return f'{join_pos_emoji} {str(members.index(user) + 1)}'
+
+    def _get_is_registered(self, user: discord.Member) -> bool:
+        if self.db.users.find_one({"_id": user.id}):
+            return True
+        else:
+            return False
+
+    def _get_is_registered_str(self, user: discord.Member) -> str:
+        if self.db.users.find_one({"_id": user.id}):
+            return "Yes"
+        else:
+            return "No"
+
+    def _get_balance(self, user: discord.Member) -> str:
+        if self.db.users.find_one({"_id": user.id}):
+            return f"{numerize.numerize(self.db.users.find_one({'_id': user.id})['balance'])} {settings.CURRENCY}"
+        else:
+            return "N/A"
+
     @user.command(
         name="infos",
         aliases=["ui", "info"],
-        usage=">user infos [user] [show_roles]"
+        usage=">user infos [user]"
     )
-    async def infos(self, ctx: commands.Context, user: discord.Member = None, show_roles: bool = True):
+    async def infos(self, ctx: commands.Context, user: discord.Member = None):
         """Get user info"""
         if user is None:
             user = ctx.message.author
@@ -170,53 +211,26 @@ class User(commands.Cog):
             await ctx.reply(content="**Hey that's me!**", embed=HezaBot.embed())
             return
 
-        date_format = '%d/%m/%Y\n`%H:%M:%S`'
-        members = sorted(ctx.guild.members, key=lambda m: m.joined_at)
-        is_registered_msg = ""
-        is_registered = False
-        balance_msg = ""
-        join_pos_emoji = ""
-
-        is_registered = self.db.users.find_one({"_id": user.id})
-
-        if is_registered:
-            user_db = self.db.users.find_one({"_id": user.id})
-            is_registered_msg = "Yes"
-            balance_msg = f"{user_db['balance']} {settings.CURRENCY}"
-        else:
-            is_registered_msg = "No"
-            balance_msg = "N/A"
-
-        if user == ctx.guild.owner:
-            join_pos_emoji = ":crown:"
-        elif user == ctx.guild.me:
-            join_pos_emoji = ":robot:"
-        elif members.index(user) == 1:
-            join_pos_emoji = ":second_place:"
-        elif members.index(user) == 2:
-            join_pos_emoji = ":third_place:"
-
         embed = discord.Embed(color=0xdfa3ff, description=user.mention)
         embed.set_author(name=str(user), icon_url=user.avatar)
         embed.set_thumbnail(url=user.avatar)
-        embed.add_field(name="Joined", value=user.joined_at.strftime(date_format))
-        embed.add_field(name="Join position", value=f'{join_pos_emoji} {str(members.index(user) + 1)}', inline=True)
-        embed.add_field(name="Created", value=user.created_at.strftime(date_format))
+        embed.add_field(name="Joined", value=self._get_joined_at(user))
+        embed.add_field(name="Join position", value=self._get_joined_pos(user), inline=True)
+        embed.add_field(name="Created", value=self._get_created_at(user))
         if not user.bot:
-            embed.add_field(name="Registered", value=is_registered_msg, inline=True)
-            embed.add_field(name="Balance", value=balance_msg, inline=True)
+            embed.add_field(name="Registered", value=self._get_is_registered_str(user), inline=True)
+            embed.add_field(name="Balance", value=self._get_balance(user), inline=True)
         else:
             embed.add_field(name="Bot", value="Yes", inline=True)
         embed.add_field(name="Status", value=user.status, inline=True)
 
-        if show_roles:
-            if len(user.roles) > 1:
-                role_string = ' '.join([r.mention for r in user.roles][1:])
-                embed.add_field(name="Roles [{}]".format(len(user.roles) - 1), value=role_string, inline=False)
-            else:
-                embed.add_field(name="Roles", value="None", inline=False)
+        if len(user.roles) > 1:
+            role_string = ' '.join([r.mention for r in user.roles][1:])
+            embed.add_field(name="Roles [{}]".format(len(user.roles) - 1), value=role_string, inline=False)
+        else:
+            embed.add_field(name="Roles", value="None", inline=False)
 
-        if not is_registered:
+        if not self._get_is_registered(user):
             embed.add_field(name="Tips", value=f"Use `{settings.COMMAND_PREFIX}user register` to register yourself!")
 
         embed.set_footer(text=f'ID: {str(user.id)}')
