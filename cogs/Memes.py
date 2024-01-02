@@ -7,7 +7,7 @@ from discord.ext import commands
 from requests import request
 
 import settings
-from Modules import Colors
+from Modules import Utils
 
 
 class Memes(commands.Cog):
@@ -78,7 +78,7 @@ class Memes(commands.Cog):
             title="Here's your meme!",
             url=meme_url,
             description=f"**Template ID:** `{template_id}`",
-            color=Colors.Embed.random()
+            color=Colors.Embed.color_random()
         )
 
         embed.set_image(url=meme_url)
