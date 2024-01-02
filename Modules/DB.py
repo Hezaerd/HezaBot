@@ -12,8 +12,6 @@ class DB:
     def __init__(self):
         if not DB._instance:
             DB._instance = DB._DB()
-            print('Connected to MongoDB')
-            print(DB._instance.client)
         else:
             print('Already connected to MongoDB')
 
