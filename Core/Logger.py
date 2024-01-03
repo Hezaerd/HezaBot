@@ -4,27 +4,24 @@ from colorama import Fore, Style
 class Logger:
     def __init__(self):
         self.__colors = {
-            "info": Fore.BLUE,
-            "warning": Fore.YELLOW,
+            "trace": Fore.WHITE,
+            "info": Fore.CYAN,
+            "warn": Fore.YELLOW,
             "error": Fore.RED,
-            "success": Fore.GREEN,
-            "debug": Fore.MAGENTA
         }
 
-    def __log(self, message, color):
-        print(f"[{self.__colors[color]}{color}{Style.RESET_ALL}] {message}")
+    def __log(self, level, tag, message):
+        print(f"{Style.RESET_ALL}{Style.BRIGHT}{self.__colors[level]}"
+              f"[{level}]: [{tag}] {message}")
 
-    def info(self, message):
-        self.__log(message, "info")
+    def trace(self, tag, message):
+        self.__log("trace", tag, message)
 
-    def warning(self, message):
-        self.__log(message, "warning")
+    def info(self, tag, message):
+        self.__log("info", tag, message)
 
-    def error(self, message):
-        self.__log(message, "error")
+    def warn(self, tag, message):
+        self.__log("warn", tag, message)
 
-    def success(self, message):
-        self.__log(message, "success")
-
-    def debug(self, message):
-        self.__log(message, "debug")
+    def error(self, tag, message):
+        self.__log("error", tag, message)

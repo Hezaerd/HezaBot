@@ -21,32 +21,26 @@ class HezaBot(commands.Bot):
 
     async def on_ready(self) -> None:
         """Event that fires when the bot is ready"""
-        self.logger.success(f"Logged in as {self.user}")
+        self.logger.info("Core", f"Logged in as {self.user}")
 
     async def load_all_extensions(self) -> None:
         """Loads all extensions"""
-        self.logger.info("Loading all extensions")
-
         for filename in os.listdir("./Cogs"):
             if filename.endswith(".py"):
-                self.logger.info(f"Found extension {filename}")
                 await self.load_extension(f"Cogs.{filename[:-3]}")
 
-        self.logger.success("Loaded all extensions")
+        self.logger.info("Core", "Loaded all extensions")
 
     async def unload_all_extensions(self) -> None:
         """Unloads all extensions"""
-        self.logger.info("Unloading all extensions")
-
         for filename in os.listdir("Cogs"):
             if filename.endswith(".py"):
                 await self.unload_extension(f"Cogs.{filename[:-3]}")
 
-        self.logger.info("Unloaded all extensions")
+        self.logger.info("Core", "Unloaded all extensions")
 
     async def reload_all_extensions(self) -> None:
         """Reloads all extensions"""
-        self.logger.info("Reloading all extensions")
         await self.unload_all_extensions()
         await self.load_all_extensions()
-        self.logger.info("Reloaded all extensions")
+        self.logger.info("Core", "Reloaded all extensions")

@@ -10,11 +10,9 @@ class Test(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.bot.logger.success(f"Loaded Cog {self.__class__.__name__} in {round(time.time() - self.startup_time, 2)}s")
+        self.bot.logger.trace("Cog.Test",
+                              f"Loaded Cog {self.__class__.__name__} in {round(time.time() - self.startup_time, 2)}s")
 
 
 async def setup(bot):
     await bot.add_cog(Test(bot))
-
-
-
