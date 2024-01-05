@@ -29,7 +29,7 @@ class HezaBot(commands.Bot):
             if filename.endswith(".py"):
                 await self.load_extension(f"Cogs.{filename[:-3]}")
 
-        self.logger.info("Core", "Loaded all extensions")
+        self.logger.info("Core", "Started loading all extensions")
 
     async def unload_all_extensions(self) -> None:
         """Unloads all extensions"""
@@ -37,7 +37,7 @@ class HezaBot(commands.Bot):
             if filename.endswith(".py"):
                 await self.unload_extension(f"Cogs.{filename[:-3]}")
 
-        self.logger.info("Core", "Unloaded all extensions")
+        self.logger.info("Core", "Started unloading all extensions")
 
     async def reload_all_extensions(self) -> None:
         """Reloads all extensions"""
